@@ -179,13 +179,34 @@ function InversionLens({ src, className }) {
     }
   }
 
-  const animate = () => [
-    
-  ]
+  const animate = () => {
+    if (
+      !uniformsRef.current ||
+      !rendererRef.current ||
+      !sceneRef.current ||
+      !cameraRef.current
+    ) {
+      animationFrameId.current = requestAnimationFrame(animate);
+      return;
+    }
+
+    lerpedMouse.current.lerp(targetMouse.current, config.lerpFactor);
+
+    uniformsRef.current.u_mouse.value.copy(lerpedMouse.current);
+    uniformsRef.current.u_time.value += 0.01;
+    uniformsRef.current.u_radius.value +=
+      (targetRadius.current - uniformsRef.current.u_radius.value) *
+      config.radiusLerpSpeed;
+
+    rendererRef.current.render(sceneRef.current, cameraRef.current);
+
+    animationFrameId.current = requestAnimationFrame(animate);
+
+  };
 
   return (
     <div ref={containerRef} className={`inversion-lens ${className || ""}`}>
-      <img src={src} style={{ display: none }} alt="" />
+      <img src={src} style={{ display: "none" }} alt="" />
     </div>
   );
 }
